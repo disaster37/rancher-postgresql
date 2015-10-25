@@ -45,7 +45,12 @@ def add_end_file(file, line):
     with open(file, "a") as myFile:
         myFile.write("\n" + line + "\n")
 
-
+def init_data_folder():
+    # We init the database folder if is empty
+    if len(os.listdir('/data')) == 0:
+      shutil.copytree("/var/lib/postgresql/" + os.getenv('POSTGRES_VERSION') + "/main/", "/data")
+      os.system('chown -R postgres /data')
+      os.system('chmod -R 700 /data')
 
 def first_run(user, password, database):
     """ Init the database
@@ -62,24 +67,13 @@ def first_run(user, password, database):
     if database is None or database == "":
       raise Exception("You must set the database")
 
-    # We init the database folder if is empty
-    if len(os.listdir('/data')) == 0:
-      shutil.copytree("/var/lib/postgresql/" + os.getenv('POSTGRES_VERSION') + "/main/", "/data")
-      os.system('chown -R postgres /data')
-      os.system('chmod -R 700 /data')
-
 
     # We create the user in postgres
-    query = """DROP ROLE IF EXISTS """ + user + """;
-    CREATE ROLE """ + user + """ WITH ENCRYPTED PASSWORD '""" + password + """';
-    ALTER USER """ + user + """ WITH ENCRYPTED PASSWORD '""" + password + """';
-    ALTER ROLE """ + user + """ WITH SUPERUSER;
-    ALTER ROLE """ + user + """ WITH LOGIN;"""
+    query = "DROP ROLE IF EXISTS " + user + ";CREATE ROLE " + user + " WITH ENCRYPTED PASSWORD '" + password + "';ALTER USER " + user + " WITH ENCRYPTED PASSWORD '" + password + "';ALTER ROLE " + user + " WITH SUPERUSER;ALTER ROLE " + user + " WITH LOGIN;"
     os.system("su - postgres -c \"psql -q " + query + "\"")
 
     # We create the database
-    query = """CREATE DATABASE """ + database + """ WITH OWNER=""" + user + """ ENCODING='UTF8';
-    GRANT ALL ON DATABASE """ + database + """ TO """ + user
+    query = "CREATE DATABASE " + database + " WITH OWNER=" + user + " ENCODING='UTF8';GRANT ALL ON DATABASE " + database + " TO " + user
     os.system("su - postgres -c \"psql -q " + query + "\"")
 
     # We remove the marker to say it's the first run
@@ -103,12 +97,15 @@ if(len(sys.argv) > 1 and sys.argv[1] == "start"):
         loop = False
         print("Gluster volume is mounted \n")
     
+    init_data_folder()
+    # Start services
+    os.system("/usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf")
+    print("Wait 30 s that postgres start
+    time.sleep(30)
+
     # Init database if needed
     if os.path.isfile('/firstrun'):
       first_run(os.getenv('USER'), os.getenv('PASS'), os.getenv('DB'))
-
-    # Start services
-    os.system("/usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf")
     
 
 
