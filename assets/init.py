@@ -75,12 +75,12 @@ def first_run(user, password, database):
     ALTER USER """ + user + """ WITH ENCRYPTED PASSWORD '""" + password + """';
     ALTER ROLE """ + user + """ WITH SUPERUSER;
     ALTER ROLE """ + user + """ WITH LOGIN;"""
-    os.system("setuser postgres psql -q " + query)
+    os.system("su - postgres -c \"psql -q " + query + "\"")
 
     # We create the database
     query = """CREATE DATABASE """ + database + """ WITH OWNER=""" + user + """ ENCODING='UTF8';
     GRANT ALL ON DATABASE """ + database + """ TO """ + user
-    os.system("setuser postgres psql -q " + query)
+    os.system("su - postgres -c \"psql -q " + query + "\"")
 
     # We remove the marker to say it's the first run
     os.remove('/firstrun')
