@@ -100,7 +100,7 @@ if(len(sys.argv) > 1 and sys.argv[1] == "start"):
     init_data_folder()
     # Start services
     os.system("/usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf")
-    print("Wait 30 s that postgres start
+    print("Wait 30 s that postgres start")
     time.sleep(30)
 
     # Init database if needed
