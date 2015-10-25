@@ -7,6 +7,7 @@ import os.path
 import shutil
 import re
 import subprocess
+import time
 
 
 
@@ -89,9 +90,14 @@ def first_run(user, password, database):
 if(len(sys.argv) > 1 and sys.argv[1] == "start"):
 
     # First we mount the gluster storage
-    p = subprocess.Popen('mount -t glusterfs gluster:/ranchervol /data', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if p.returncode != 0:
-      raise Exception("We can't mount glusterfs volume. Are you sure you have linked gluster service with name 'gluster' ?")
+    loop = True
+    while(loop):
+      p = subprocess.Popen('mount -t glusterfs gluster:/ranchervol /data', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      if p.returncode != 0:
+        print("We can't mount glusterfs volume. Are you sure you have linked gluster service with name 'gluster' ? We retry in 60 seconds")
+        time.sleep(60)
+      else:
+        loop = False
     
     # Init database if needed
     if os.path.isfile('/firstrun'):

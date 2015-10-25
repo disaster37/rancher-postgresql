@@ -33,6 +33,8 @@ RUN touch /firstrun
 # CLEAN APT
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN mkdir /data
+
 
 EXPOSE 5432
 VOLUME ["/var/log/postgresql", "/etc/postgresql"]
