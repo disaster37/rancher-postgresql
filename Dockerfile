@@ -35,5 +35,5 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 
 EXPOSE 5432
-VOLUME ["/data", "/var/log/postgresql", "/etc/postgresql"]
+VOLUME ["/var/log/postgresql", "/etc/postgresql"]
 CMD [ "/app/init.py", "start" ]
