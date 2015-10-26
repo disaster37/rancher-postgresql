@@ -8,7 +8,55 @@ import shutil
 import re
 import subprocess
 import time
+from threading import Thread
 
+
+class ThreadQuery(Thread):
+
+  def __init__(self, user, password, database):
+    """ Init the database
+    :param user: the database owner
+    :param password: the password for user
+    :param database: the database name
+    :return:
+    """
+    
+    
+    if user is None or user == "":
+      raise Exception("You must set the user")
+    if password is None or password == "":
+      raise Exception("You must set the password")
+    if database is None or database == "":
+      raise Exception("You must set the database")
+
+    Thread.__init__(self)
+    self.user = user
+    self.password = password
+    self.database = database
+
+  def run(self):
+    
+    print("Wait 30s that postgres start \n")
+    time.sleep(30)
+
+
+    # We create the user in postgres
+    query = "DROP ROLE IF EXISTS " + self.user + ";CREATE ROLE " + self.user + " WITH ENCRYPTED PASSWORD '" + self.password + "';ALTER USER " + self.user + " WITH ENCRYPTED PASSWORD '" + self.password + "';ALTER ROLE " + self.user + " WITH SUPERUSER;ALTER ROLE " + self.user + " WITH LOGIN;"
+    os.system("su - postgres -c \"psql -q -c \\\"" + query + "\\\"\"")
+
+    # We create the database
+    query = "CREATE DATABASE " + self.database + " WITH OWNER=" + self.user + " ENCODING='UTF8';"
+    os.system("su - postgres -c \"psql -q -c \\\"" + query + "\\\"\"")
+
+    # We set the right
+    query = "GRANT ALL ON DATABASE " + self.database + " TO " + self.user + ";"
+    os.system("su - postgres -c \"psql -q -c \\\"" + query + "\\\"\"")
+
+    # We remove the marker to say it's the first run
+    os.remove('/firstrun')
+
+    print("Database and user is setting on Postgresql !\n")
+    
 
 
 def replace_all(file, searchRegex, replaceExp):
@@ -47,37 +95,15 @@ def add_end_file(file, line):
 
 def init_data_folder():
     # We init the database folder if is empty
-    if len(os.listdir('/data')) == 0:
-      shutil.copytree("/var/lib/postgresql/" + os.getenv('POSTGRES_VERSION') + "/main/", "/data")
+    if len(os.listdir('/data')) < 3:
+      os.system('cp -R /var/lib/postgresql/' + os.getenv('POSTGRES_VERSION') + '/main/* /data/')
       os.system('chown -R postgres /data')
       os.system('chmod -R 700 /data')
-
-def first_run(user, password, database):
-    """ Init the database
-    :param user: the database owner
-    :param password: the password for user
-    :param database: the database name
-    :return:
-    """
-
-    if user is None or user == "":
-      raise Exception("You must set the user")
-    if password is None or password == "":
-      raise Exception("You must set the password")
-    if database is None or database == "":
-      raise Exception("You must set the database")
+      print("Data folder for Postgresql is initialized\n")
+    else:
+      print("Data folder for Postgresql is already initialized\n")
 
 
-    # We create the user in postgres
-    query = "DROP ROLE IF EXISTS " + user + ";CREATE ROLE " + user + " WITH ENCRYPTED PASSWORD '" + password + "';ALTER USER " + user + " WITH ENCRYPTED PASSWORD '" + password + "';ALTER ROLE " + user + " WITH SUPERUSER;ALTER ROLE " + user + " WITH LOGIN;"
-    os.system("su - postgres -c \"psql -q " + query + "\"")
-
-    # We create the database
-    query = "CREATE DATABASE " + database + " WITH OWNER=" + user + " ENCODING='UTF8';GRANT ALL ON DATABASE " + database + " TO " + user
-    os.system("su - postgres -c \"psql -q " + query + "\"")
-
-    # We remove the marker to say it's the first run
-    os.remove('/firstrun')
 
 
 # Start
@@ -97,15 +123,19 @@ if(len(sys.argv) > 1 and sys.argv[1] == "start"):
         loop = False
         print("Gluster volume is mounted \n")
     
+    # Init data folder
     init_data_folder()
-    # Start services
-    os.system("/usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf")
-    print("Wait 30 s that postgres start")
-    time.sleep(30)
 
+    # Start thread to create database
     # Init database if needed
     if os.path.isfile('/firstrun'):
-      first_run(os.getenv('USER'), os.getenv('PASS'), os.getenv('DB'))
+      thread_query = ThreadQuery(os.getenv('USER'), os.getenv('PASS'), os.getenv('DB'))
+      thread_query.start()
+
+    # Start services
+    os.system("/usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf")
+    
+
     
 
 
