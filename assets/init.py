@@ -149,7 +149,7 @@ if(len(sys.argv) > 1 and sys.argv[1] == "start"):
 
     # Set backup policy
     if os.getenv('POSTGRES_BACKUP_SCHEDULE') is not None and os.getenv('POSTGRES_BACKUP_SCHEDULE') != 'disabled':
-      set_backup_policy(os.getenv('POSTGRES_BACKUP_SCHEDULE'), os.getenv('POSTGRES_BACKUP_DIRECTORY'), os.getenv('POSTGRES_BACKUP_PURGE 8'))
+      set_backup_policy(os.getenv('POSTGRES_BACKUP_SCHEDULE'), os.getenv('POSTGRES_BACKUP_DIRECTORY'), os.getenv('POSTGRES_BACKUP_PURGE'))
 
     # Start thread to create database
     # Init database if needed
