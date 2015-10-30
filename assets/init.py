@@ -158,12 +158,14 @@ if(len(sys.argv) > 1 and sys.argv[1] == "start"):
         password = subprocess.check_output(program)
         print("The password is : " + password)
       else:
-	password = os.getenv('PASS')
+	    password = os.getenv('PASS')
 
       thread_query = ThreadQuery(os.getenv('USER'),password, os.getenv('DB'))
       thread_query.start()
 
 
+    # Start services
+    os.system("exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf --nodaemon")
 
 
 
