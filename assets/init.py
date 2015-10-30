@@ -164,9 +164,6 @@ if(len(sys.argv) > 1 and sys.argv[1] == "start"):
       thread_query.start()
 
 
-    # Start services
-    p = subprocess.Popen("/usr/bin/supervisord -c /etc/supervisor/supervisord.conf --nodaemon",  shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    p.communicate()
 
 
 

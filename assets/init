@@ -1,0 +1,4 @@
+#!/bin/bash
+
+python init.py start &
+/usr/bin/supervisord -c /etc/supervisor/supervisord.conf --nodaemon
