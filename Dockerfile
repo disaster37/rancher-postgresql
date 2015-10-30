@@ -4,6 +4,13 @@ MAINTAINER Sebastien LANGOUREAUX <linuxworkgroup@hotmail.com>
 
 ENV POSTGRES_VERSION 9.3
 
+ENV DB app
+ENV USER admin
+ENV GLUSTER_VOLUME dbvol
+ENV POSTGRES_BACKUP_SCHEDULE '0 2 * * *'
+ENV POSTGRES_BACKUP_DIRECTORY '/data/backup'
+ENV POSTGRES_BACKUP_PURGE 8
+
 # Install postgres
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
     apt-get update && \
@@ -14,6 +21,12 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" > /etc/
 RUN sed -i -e"s/data_directory =.*$/data_directory = '\/data'/" /etc/postgresql/${POSTGRES_VERSION}/main/postgresql.conf
 RUN sed -i -e"s/^#listen_addresses =.*$/listen_addresses = '*'/" /etc/postgresql/${POSTGRES_VERSION}/main/postgresql.conf
 RUN echo "host    all    all    0.0.0.0/0    md5" >> /etc/postgresql/${POSTGRES_VERSION}/main/pg_hba.conf
+
+# Install backup tools
+WORKDIR /opt
+RUN git clone https://github.com/orgrim/pg_back.git
+RUN chmod +x /opt/pg_back/pg_back
+RUN cp /opt/pg_back/pg_back.conf /etc/postgresql/pg_back.conf
 
 
 # Add logrorate setting

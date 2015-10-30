@@ -20,8 +20,8 @@ class ThreadQuery(Thread):
     :param database: the database name
     :return:
     """
-    
-    
+
+
     if user is None or user == "":
       raise Exception("You must set the user")
     if password is None or password == "":
@@ -35,7 +35,7 @@ class ThreadQuery(Thread):
     self.database = database
 
   def run(self):
-    
+
     print("Wait 30s that postgres start \n")
     time.sleep(30)
 
@@ -56,7 +56,7 @@ class ThreadQuery(Thread):
     os.remove('/firstrun')
 
     print("Database and user is setting on Postgresql !\n")
-    
+
 
 
 def replace_all(file, searchRegex, replaceExp):
@@ -103,6 +103,27 @@ def init_data_folder():
     else:
       print("Data folder for Postgresql is already initialized\n")
 
+def set_backup_policy(schedule, backup_directory, purge):
+    if schedule is None or schedule == '':
+	    raise KeyError("You must set the shedule for backup. It's the cron syntax")
+    if backup_directory is None or backup_directory == '':
+        raise KeyError("You must set the backup directory")
+    if purge is None or purge < 0:
+        raise KeyError("You must set the purge policy")
+
+    # We set the backup directory
+    replace_all('/etc/postgresql/pg_back.conf', 'PGBK_BACKUP_DIR=.*', 'PGBK_BACKUP_DIR=' + backup_directory)
+
+    # We create backup directory
+    os.system('mkdir -p ' + backup_directory)
+
+    # We set the purge policy
+    replace_all('/etc/postgresql/pg_back.conf', 'PGBK_PURGE=.*', 'PGBK_PURGE=' + purge)
+
+    # We set the cron
+    add_end_file('/etc/cron.d/postgresql_backup.conf', schedule + " postgres /opt/pg_back/pg_back")
+
+
 
 
 
@@ -112,7 +133,7 @@ if(len(sys.argv) > 1 and sys.argv[1] == "start"):
     # First we mount the gluster storage
     loop = True
     while(loop):
-      p = subprocess.Popen('mount -t glusterfs gluster:/ranchervol /data', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      p = subprocess.Popen('mount -t glusterfs gluster:' + os.getenv('GLUSTER_VOLUME')  + ' /data', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       output, error = p.communicate()
       if p.returncode != 0:
         print("We can't mount glusterfs volume. Are you sure you have linked gluster service with name 'gluster' ? We retry in 60 seconds \n")
@@ -122,21 +143,35 @@ if(len(sys.argv) > 1 and sys.argv[1] == "start"):
       else:
         loop = False
         print("Gluster volume is mounted \n")
-    
+
     # Init data folder
     init_data_folder()
+
+    # Set backup policy
+    if os.getenv('POSTGRES_BACKUP_SCHEDULE') is not None and os.getenv('POSTGRES_BACKUP_SCHEDULE') != 'disabled':
+      set_backup_policy(os.getenv('POSTGRES_BACKUP_SCHEDULE'), os.getenv('POSTGRES_BACKUP_DIRECTORY'), os.getenv('POSTGRES_BACKUP_PURGE 8'))
 
     # Start thread to create database
     # Init database if needed
     if os.path.isfile('/firstrun'):
-      thread_query = ThreadQuery(os.getenv('USER'), os.getenv('PASS'), os.getenv('DB'))
+      if os.getenv('PASS') is None:
+	program = ['pwgen',
+ 		13,
+		1]
+        password = subprocess.check_output(program)
+        print("The password is : " + password)
+      else:
+	password = os.getenv('PASS')
+
+      thread_query = ThreadQuery(os.getenv('USER'),password, os.getenv('DB'))
       thread_query.start()
+
 
     # Start services
     os.system("/usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf")
-    
-
-    
 
 
-    
+
+
+
+
