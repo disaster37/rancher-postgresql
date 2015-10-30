@@ -38,7 +38,7 @@ ADD assets/setup/supervisor-postgresql.conf /etc/supervisor/conf.d/postgresql.co
 
 # Add main script
 ADD assets/init.py /app/init.py
-ADD assets/init.py /app/run
+ADD assets/run /app/run
 RUN chmod 755 /app/init.py
 RUN chmod 755 /app/run
 WORKDIR /app
