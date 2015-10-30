@@ -122,11 +122,7 @@ def set_backup_policy(schedule, backup_directory, purge):
 
 
 
-
-
-# Start
-if(len(sys.argv) > 1 and sys.argv[1] == "start"):
-
+if(len(sys.argv) > 1 and sys.argv[1] == "init"):
     # First we mount the gluster storage
     loop = True
     while(loop):
@@ -144,28 +140,26 @@ if(len(sys.argv) > 1 and sys.argv[1] == "start"):
     # Init data folder
     init_data_folder()
 
-    # Set backup policy
+     # Set backup policy
     if os.getenv('POSTGRES_BACKUP_SCHEDULE') is not None and os.getenv('POSTGRES_BACKUP_SCHEDULE') != 'disabled':
       set_backup_policy(os.getenv('POSTGRES_BACKUP_SCHEDULE'), os.getenv('POSTGRES_BACKUP_DIRECTORY'), os.getenv('POSTGRES_BACKUP_PURGE'))
+
+# Start
+if(len(sys.argv) > 1 and sys.argv[1] == "start"):
 
     # Start thread to create database
     # Init database if needed
     if os.path.isfile('/firstrun'):
-      if os.getenv('PASS') is None:
-	program = ['pwgen',
- 		13,
-		1]
-        password = subprocess.check_output(program)
-        print("The password is : " + password)
-      else:
-	    password = os.getenv('PASS')
+        if os.getenv('PASS') is None:
+            program = ['pwgen',13,1]
+            password = subprocess.check_output(program)
+            print("The password is : " + password)
+        else:
+	        password = os.getenv('PASS')
 
-      thread_query = ThreadQuery(os.getenv('USER'),password, os.getenv('DB'))
-      thread_query.start()
+        thread_query = ThreadQuery(os.getenv('USER'),password, os.getenv('DB'))
+        thread_query.start()
 
-
-    # Start services
-    os.system("exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf --nodaemon")
 
 
 

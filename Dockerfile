@@ -38,7 +38,9 @@ ADD assets/setup/supervisor-postgresql.conf /etc/supervisor/conf.d/postgresql.co
 
 # Add main script
 ADD assets/init.py /app/init.py
+ADD assets/init.py /app/init
 RUN chmod 755 /app/init.py
+RUN chmod 755 /app/init
 WORKDIR /app
 
 # Add empty file to look if the first time that container is lauched
@@ -52,4 +54,4 @@ RUN mkdir /data
 
 EXPOSE 5432
 VOLUME ["/var/log/postgresql", "/etc/postgresql"]
-CMD [ "/app/init.py", "start"]
+CMD [ "/app/init"]
