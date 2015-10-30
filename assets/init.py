@@ -105,7 +105,7 @@ def init_data_folder():
 
 def set_backup_policy(schedule, backup_directory, purge):
     if schedule is None or schedule == '':
-	    raise KeyError("You must set the shedule for backup. It's the cron syntax")
+        raise KeyError("You must set the shedule for backup. It's the cron syntax")
     if backup_directory is None or backup_directory == '':
         raise KeyError("You must set the backup directory")
     if purge is None or purge < 0:
@@ -126,7 +126,7 @@ if(len(sys.argv) > 1 and sys.argv[1] == "init"):
     # First we mount the gluster storage
     loop = True
     while(loop):
-      p = subprocess.Popen('mount -t glusterfs gluster:' + os.getenv('GLUSTER_VOLUME')  + ' /data', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+      p = subprocess.Popen('mount -t glusterfs storage:' + os.getenv('GLUSTER_VOLUME')  + ' /data', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
       output, error = p.communicate()
       if p.returncode != 0:
         print("We can't mount glusterfs volume. Are you sure you have linked gluster service with name 'gluster' ? We retry in 60 seconds \n")
