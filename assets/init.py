@@ -114,9 +114,6 @@ def set_backup_policy(schedule, backup_directory, purge):
     # We set the backup directory
     replace_all('/etc/postgresql/pg_back.conf', 'PGBK_BACKUP_DIR=.*', 'PGBK_BACKUP_DIR=' + backup_directory)
 
-    # We create backup directory
-    os.system('mkdir -p ' + backup_directory)
-
     # We set the purge policy
     replace_all('/etc/postgresql/pg_back.conf', 'PGBK_PURGE=.*', 'PGBK_PURGE=' + purge)
 
