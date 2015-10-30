@@ -50,5 +50,5 @@ RUN mkdir /data
 
 
 EXPOSE 5432
-VOLUME ["/var/log/postgresql", "/etc/postgresql"]
+VOLUME ["/var/log/postgresql", "/etc/postgresql", "/var/run/postgresql/"]
 CMD [ "/app/init.py", "start" ]
