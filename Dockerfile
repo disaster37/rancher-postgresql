@@ -21,6 +21,9 @@ RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" > /etc/
 RUN sed -i -e"s/data_directory =.*$/data_directory = '\/data'/" /etc/postgresql/${POSTGRES_VERSION}/main/postgresql.conf
 RUN sed -i -e"s/^#listen_addresses =.*$/listen_addresses = '*'/" /etc/postgresql/${POSTGRES_VERSION}/main/postgresql.conf
 RUN echo "host    all    all    0.0.0.0/0    md5" >> /etc/postgresql/${POSTGRES_VERSION}/main/pg_hba.conf
+RUN mkdir -p /var/run/postgresql/9.3-main.pg_stat_tmp
+RUN chown postgres /var/run/postgresql/9.3-main.pg_stat_tmp
+RUN chgrp postgres /var/run/postgresql/9.3-main.pg_stat_tmp
 
 # Install backup tools
 WORKDIR /opt
@@ -53,5 +56,5 @@ RUN mkdir /data
 
 
 EXPOSE 5432
-VOLUME ["/var/log/postgresql", "/etc/postgresql"]
+VOLUME ["/var/log/postgresql", "/etc/postgresql", /var/run/postgresql/9.3-main.pg_stat_tmp]
 CMD [ "/app/run"]
