@@ -133,7 +133,7 @@ if(len(sys.argv) > 1 and sys.argv[1] == "init"):
      # Set backup policy
     if os.getenv('POSTGRES_BACKUP_SCHEDULE') is not None and os.getenv('POSTGRES_BACKUP_SCHEDULE') != 'disabled':
       service.set_backup_policy(os.getenv('POSTGRES_BACKUP_SCHEDULE'), os.getenv('POSTGRES_BACKUP_DIRECTORY'), os.getenv('POSTGRES_BACKUP_PURGE'))
-      os.service('supervisorctrl restart cron')
+      os.service('supervisorctl restart cron')
 
 # Start
 if(len(sys.argv) > 1 and sys.argv[1] == "start"):
