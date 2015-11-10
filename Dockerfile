@@ -56,5 +56,5 @@ RUN mkdir /data
 
 
 EXPOSE 5432
-VOLUME ["/var/log/postgresql", "/etc/postgresql", /var/run/postgresql/9.3-main.pg_stat_tmp]
+VOLUME ["/var/log/postgresql", "/etc/postgresql", "/var/run/postgresql/9.3-main.pg_stat_tmp"]
 CMD [ "/app/run"]
