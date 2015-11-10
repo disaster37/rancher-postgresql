@@ -127,18 +127,19 @@ if(len(sys.argv) > 1 and sys.argv[1] == "init"):
         print("Gluster volume is mounted \n")
 
     # Init data folder
-    service = ServiceRun()
-    service.init_data_folder()
+    if os.path.isfile('/firstrun'):
+      service = ServiceRun()
+      service.init_data_folder()
 
-     # Set backup policy
-    if os.getenv('POSTGRES_BACKUP_SCHEDULE') is not None and os.getenv('POSTGRES_BACKUP_SCHEDULE') != 'disabled':
-      service.set_backup_policy(os.getenv('POSTGRES_BACKUP_SCHEDULE'), os.getenv('POSTGRES_BACKUP_DIRECTORY'), os.getenv('POSTGRES_BACKUP_PURGE'))
+      # Set backup policy
+      if os.getenv('POSTGRES_BACKUP_SCHEDULE') is not None and os.getenv('POSTGRES_BACKUP_SCHEDULE') != 'disabled':
+        service.set_backup_policy(os.getenv('POSTGRES_BACKUP_SCHEDULE'), os.getenv('POSTGRES_BACKUP_DIRECTORY'), os.getenv('POSTGRES_BACKUP_PURGE'))
 
 # Start
 if(len(sys.argv) > 1 and sys.argv[1] == "start"):
 
-    # Start thread to create database
-    # Init database if needed
+
+    # Init database account if needed
     if os.path.isfile('/firstrun'):
         if os.getenv('PASS') is None:
             program = ['pwgen',13,1]
