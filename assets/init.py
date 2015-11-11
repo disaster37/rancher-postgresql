@@ -55,21 +55,32 @@ class ServiceRun():
       print("Data folder for Postgresql is already initialized\n")
 
   def set_backup_policy(self, schedule, backup_directory, purge):
-    if schedule is None or schedule == '':
-        raise KeyError("You must set the shedule for backup. It's the cron syntax")
-    if backup_directory is None or backup_directory == '':
+
+
+    # We set backup setting en cron
+    if os.getenv('POSTGRES_BACKUP_SCHEDULE') is not None and os.getenv('POSTGRES_BACKUP_SCHEDULE') != 'disabled':
+      if backup_directory is None or backup_directory == '':
         raise KeyError("You must set the backup directory")
-    if purge is None or purge < 0:
+      if purge is None or purge < 0:
         raise KeyError("You must set the purge policy")
 
-    # We set the backup directory
-    replace_all('/etc/postgresql/pg_back.conf', 'PGBK_BACKUP_DIR=.*', 'PGBK_BACKUP_DIR=' + backup_directory)
+      # We set the backup directory
+      replace_all('/etc/postgresql/pg_back.conf', 'PGBK_BACKUP_DIR=.*', 'PGBK_BACKUP_DIR=' + backup_directory)
 
-    # We set the purge policy
-    replace_all('/etc/postgresql/pg_back.conf', 'PGBK_PURGE=.*', 'PGBK_PURGE=' + purge)
+      # We set the purge policy
+      replace_all('/etc/postgresql/pg_back.conf', 'PGBK_PURGE=.*', 'PGBK_PURGE=' + purge)
 
-    # We set the cron
-    add_end_file('/etc/cron.d/postgresql_backup.conf', schedule + " postgres /opt/pg_back/pg_back")
+      replace_all('/etc/cron.d/postgresql_backup.conf', re.escape('/opt/pg_back/pg_back'), schedule + " postgres /opt/pg_back/pg_back")
+
+      print("Cron backup policy updated")
+
+    # We remove the cron
+    else:
+      replace_all('/etc/cron.d/postgresql_backup.conf', re.escape('/opt/pg_back/pg_back'), '')
+      print("Cron backup policy disabled")
+
+
+
 
 
 
@@ -131,9 +142,8 @@ if(len(sys.argv) > 1 and sys.argv[1] == "init"):
       service = ServiceRun()
       service.init_data_folder()
 
-      # Set backup policy
-      if os.getenv('POSTGRES_BACKUP_SCHEDULE') is not None and os.getenv('POSTGRES_BACKUP_SCHEDULE') != 'disabled':
-        service.set_backup_policy(os.getenv('POSTGRES_BACKUP_SCHEDULE'), os.getenv('POSTGRES_BACKUP_DIRECTORY'), os.getenv('POSTGRES_BACKUP_PURGE'))
+    # Set backup policy
+    service.set_backup_policy(os.getenv('POSTGRES_BACKUP_SCHEDULE'), os.getenv('POSTGRES_BACKUP_DIRECTORY'), os.getenv('POSTGRES_BACKUP_PURGE'))
 
 # Start
 if(len(sys.argv) > 1 and sys.argv[1] == "start"):

@@ -38,6 +38,10 @@ ADD assets/setup/logrotate-postgres.conf /etc/logrotate.d/postgresql
 # Add supervisor setting
 ADD assets/setup/supervisor-postgresql.conf /etc/supervisor/conf.d/postgresql.conf
 
+# Add Backuo cron job
+ADD assets/setup/cron-postgresql_backup.conf /etc/cron.d/postgresql_backup.conf
+RUN chmod 0644 /etc/cron.d/postgresql_backup.conf
+
 
 # Add main script
 ADD assets/init.py /app/init.py
