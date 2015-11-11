@@ -11,6 +11,9 @@ ENV POSTGRES_BACKUP_SCHEDULE '0 2 * * *'
 ENV POSTGRES_BACKUP_DIRECTORY '/data/backup'
 ENV POSTGRES_BACKUP_PURGE 8
 
+# Install GPG key
+RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
 # Install postgres
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
     apt-get update && \
