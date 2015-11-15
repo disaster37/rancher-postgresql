@@ -70,7 +70,7 @@ class ServiceRun():
       # We set the purge policy
       replace_all('/etc/postgresql/pg_back.conf', 'PGBK_PURGE=.*', 'PGBK_PURGE=' + purge)
 
-      replace_all('/etc/cron.d/postgresql_backup.conf', re.escape('/opt/pg_back/pg_back'), schedule + " postgres /opt/pg_back/pg_back")
+      replace_all('/etc/cron.d/postgresql_backup.conf', '.*' + re.escape('/opt/pg_back/pg_back') + '.*', schedule + " postgres /opt/pg_back/pg_back")
 
       print("Cron backup policy updated")
 
@@ -138,8 +138,8 @@ if(len(sys.argv) > 1 and sys.argv[1] == "init"):
         print("Gluster volume is mounted \n")
 
     # Init data folder
+    service = ServiceRun()
     if os.path.isfile('/firstrun'):
-      service = ServiceRun()
       service.init_data_folder()
 
     # Set backup policy
