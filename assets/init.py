@@ -24,8 +24,11 @@ class ServiceRun():
     if database is None or database == "":
       raise Exception("You must set the database")
 
-    print("Wait 30s that postgres start \n")
-    time.sleep(30)
+    print("We stay that Postgresql start : ")
+	while os.system('/usr/lib/postgresql/9.3/bin/pg_isready') != 0:
+		time.sleep(1)
+	
+	print("Ok \n")
 
 
     # We create the user in postgres
