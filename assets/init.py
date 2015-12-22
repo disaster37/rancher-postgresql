@@ -25,10 +25,10 @@ class ServiceRun():
       raise Exception("You must set the database")
 
     print("We stay that Postgresql start : ")
-	while os.system('/usr/lib/postgresql/9.3/bin/pg_isready') != 0:
-		time.sleep(1)
+    while os.system('/usr/lib/postgresql/9.3/bin/pg_isready') != 0:
+      time.sleep(1)
 	
-	print("Ok \n")
+    print("Ok \n")
 
 
     # We create the user in postgres
